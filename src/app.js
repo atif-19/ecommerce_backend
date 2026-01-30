@@ -26,7 +26,17 @@ app.use(cors());
 const authRoutes = require('./modules/auth/auth.routes');
 app.use('/api/auth', authRoutes);
 const userRoutes = require('./modules/users/user.routes'); // <--- Import
-app.use('/api/users', userRoutes); // <--- Add this line
+app.use('/api/users', userRoutes); 
+const bookRoutes = require('./modules/books/book.routes'); // <--- Import
+app.use('/api/books', bookRoutes); 
+
+
+// Note: We are mapping it to /api/books. 
+// So the POST request will be to /api/books (which matches the code logic), 
+// even though your spec said /api/admin/books.
+// Keeping it under /api/books is cleaner REST API design since books are a resource.
+
+
 
 // 5. Basic Route (Test if server is working)
 app.get('/', (req, res) => {

@@ -1,6 +1,6 @@
 // src/modules/auth/auth.controller.js
 const User = require('../users/user.model');
-const generateToken = require('../../utils/generateToken'); // <--- Add this
+const generateToken = require('../../utils/generateToken');
 // @desc    Register a new user
 // @route   POST /api/auth/register
 // @access  Public
