@@ -29,7 +29,8 @@ const userRoutes = require('./modules/users/user.routes'); // <--- Import
 app.use('/api/users', userRoutes); 
 const bookRoutes = require('./modules/books/book.routes'); // <--- Import
 app.use('/api/books', bookRoutes); 
-
+const cartRoutes = require('./modules/cart/cart.routes'); // <--- Import
+app.use('/api/cart', cartRoutes);
 
 // Note: We are mapping it to /api/books. 
 // So the POST request will be to /api/books (which matches the code logic), 

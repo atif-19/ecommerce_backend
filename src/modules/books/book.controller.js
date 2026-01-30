@@ -34,29 +34,44 @@ const createBook = async (req, res) => {
   }
 };
 
-// @desc    Get all books with Search capability
-// @route   GET /api/books?keyword=...
+
+// @desc    Get books with Search, Category, and Price filters
+// @route   GET /api/books?keyword=Harry&category=Fiction&minPrice=10&maxPrice=50
 // @access  Public
 const getBooks = async (req, res) => {
+console.log("getBooks called");
   try {
-    // 1. extract keyword from query params
-    const keyword = req.query.keyword
-      ? {
-          title: {
-            // this is a regex search string for partial matching in js
-            $regex: req.query.keyword, // Matches part of the string (e.g. "Har" matches "Harry")
-            // it should match regardless of case (i.e. "har", "HAR", "Har" all match "Harry")
-            $options: 'i', // Case insensitive (Matches "harry", "HARRY", "Harry")
-          },
-        }
-      : {};
+    const { keyword, category, minPrice, maxPrice } = req.query;
 
-    // 2. Find books that match the keyword AND are active
-    //...the spread operator (...) merges the two objects   
-    const books = await Book.find({ ...keyword, isActive: true });
-    
+    // 1. Build the Query Object
+    let query = { isActive: true };
+
+    // 2. Add Search Logic (if keyword exists)
+    if (keyword) {
+      query.title = {
+        $regex: keyword,
+        $options: 'i', // Case insensitive
+      };
+    }
+
+    // 3. Add Category Logic (if category exists)
+    if (category) {
+      query.category = category;
+    }
+
+    // 4. Add Price Range Logic (if min or max price exists)
+    if (minPrice || maxPrice) {
+      query.price = {};
+      if (minPrice) query.price.$gte = Number(minPrice); // Greater than or equal
+      if (maxPrice) query.price.$lte = Number(maxPrice); // Less than or equal
+    }
+
+    // 5. Execute the Query
+    const books = await Book.find(query);
+
     res.status(200).json(books);
   } catch (error) {
+    console.error(error);
     res.status(500).json({ message: error.message });
   }
 };
