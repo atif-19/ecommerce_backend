@@ -31,7 +31,8 @@ const bookRoutes = require('./modules/books/book.routes'); // <--- Import
 app.use('/api/books', bookRoutes); 
 const cartRoutes = require('./modules/cart/cart.routes'); // <--- Import
 app.use('/api/cart', cartRoutes);
-
+const orderRoutes = require('./modules/orders/order.routes'); // <--- Import
+app.use('/api/orders', orderRoutes); // <--- Add this
 // Note: We are mapping it to /api/books. 
 // So the POST request will be to /api/books (which matches the code logic), 
 // even though your spec said /api/admin/books.
@@ -49,3 +50,4 @@ const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`);
 });
+
