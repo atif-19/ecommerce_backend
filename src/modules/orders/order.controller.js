@@ -29,7 +29,14 @@ const createOrder = async (req, res) => {
 
     // simple for loop to calculate total and prepare order items
     for (const item of cart.items) {
-      const book = item.bookId;
+      const book = item.bookId; // This is the full book document thanks to populate
+
+      // CHECK: Is there enough stock?
+      if (book.stockQuantity < item.quantity) {
+        return res.status(400).json({ 
+          message: `Not enough stock for '${book.title}'. Only ${book.stockQuantity} left.` 
+        });
+      }
       
       // Calculate item total
       totalAmount += book.price * item.quantity;
