@@ -33,6 +33,8 @@ const cartRoutes = require('./modules/cart/cart.routes'); // <--- Import
 app.use('/api/cart', cartRoutes);
 const orderRoutes = require('./modules/orders/order.routes'); // <--- Import
 app.use('/api/orders', orderRoutes); // <--- Add this
+const paymentRoutes = require('./modules/payments/payment.routes'); // <--- Import
+app.use('/api/payments', paymentRoutes);
 // Note: We are mapping it to /api/books. 
 // So the POST request will be to /api/books (which matches the code logic), 
 // even though your spec said /api/admin/books.

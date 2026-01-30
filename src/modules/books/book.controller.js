@@ -39,7 +39,6 @@ const createBook = async (req, res) => {
 // @route   GET /api/books?keyword=Harry&category=Fiction&minPrice=10&maxPrice=50
 // @access  Public
 const getBooks = async (req, res) => {
-console.log("getBooks called");
   try {
     const { keyword, category, minPrice, maxPrice } = req.query;
 
