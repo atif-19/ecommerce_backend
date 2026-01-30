@@ -4,15 +4,24 @@ const dotenv = require('dotenv');
 const cors = require('cors');
 const connectDB = require('./utils/db');
 const bodyParser = require('body-parser');
+
+
+// --- NEW SECURITY IMPORTS ---
+const mongoSanitize = require("express-mongo-sanitize");
+const rateLimit = require('express-rate-limit');
+const helmet = require('helmet');
+const hpp = require('hpp');
+
 // 1. Load environment variables
 dotenv.config();
 
 // 2. Connect to Database
 connectDB();
 
+// after establishing DB connection let's use security middlewares
+
 // 3. Initialize Express
 const app = express();
-
 
 // 4. Middleware
 // Body parser middleware
@@ -21,6 +30,31 @@ app.use(bodyParser.urlencoded({ extended: true }));
 app.use(express.json()); 
 // Allows cross-origin requests (essential if frontend is on a different port)
 app.use(cors());
+
+
+// --- SECURITY MIDDLEWARE's---
+// 1. Set Security Headers
+app.use(helmet());
+
+// 2. Body Parser (Reading JSON)
+app.use(express.json({ limit: '10kb' })); // Limit body size to 10kb to prevent crashes
+
+// 3. Data Sanitization against NoSQL Injection
+// app.use(mongoSanitize({ replaceWith: "_" }));
+
+
+// 5. Rate Limiting (Prevent Brute Force)
+const limiter = rateLimit({
+  windowMs: 10 * 60 * 1000, // 10 minutes
+  max: 100, // Limit each IP to 100 requests per windowMs
+  message: 'Too many requests from this IP, please try again after 10 minutes',
+});
+
+app.use('/api', limiter); // Apply to all API routes
+// 6. Prevent Parameter Pollution
+app.use(hpp());
+
+
 
 // Routes
 const authRoutes = require('./modules/auth/auth.routes');
