@@ -1,4 +1,3 @@
-// src/modules/books/book.routes.js
 const express = require('express');
 const { protect, admin } = require('../../middlewares/authMiddleware');
 const { 
