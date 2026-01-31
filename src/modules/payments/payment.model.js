@@ -30,7 +30,7 @@ const paymentSchema = new mongoose.Schema(
     // method used for payment
     paymentMethod: {
       type: String,
-      enum: ['STRIPE', 'PAYPAL', 'MOCK'], // 'MOCK' for our testing
+      enum: ['STRIPE', 'MOCK_RAZORPAY', 'MOCK'], // 'MOCK' for our testing
       default: 'MOCK',
     },
     // transaction identifier from payment gateway
