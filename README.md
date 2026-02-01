@@ -63,3 +63,30 @@ npm run dev
 npm start
 ```
 The server will start on http://localhost:5000.
+
+## 🔄 Application Flow
+
+The API follows a strict **MVC** pattern with secure token-based authentication. Here is the lifecycle of a typical purchase:
+
+### 1. Authentication Phase
+* **User Registers** (`POST /api/auth/register`) → Account created in MongoDB.
+* **User Logins** (`POST /api/auth/login`) → Server validates credentials and issues a **JWT Bearer Token**.
+* *Note: This token must be included in the Header (`Authorization: Bearer <token>`) for all subsequent steps.*
+
+### 2. Shopping Phase
+* **Browse Catalog** (`GET /api/books`) → User views available books.
+* **Add to Cart** (`POST /api/cart`) → Item added to user's persistent cart.
+* **Checkout** (`POST /api/orders`) → The Cart is converted into a **Pending Order**.
+
+### 3. Payment & Transaction Phase (The Secure Core)
+This project simulates a real-world secure payment loop:
+1.  **Initiate Payment** (`POST /api/payments/create-order`)
+    * Server generates a Mock Payment ID.
+    * Server pre-calculates a **Cryptographic Signature** (acting as the Bank).
+2.  **Verify Payment** (`POST /api/payments/verify`)
+    * Client sends the Signature + Payment ID back to the server.
+    * **Security Check:** Server re-hashes the data to verify authenticity.
+    * **ACID Transaction:**
+        * If valid: Order marked **PAID**.
+        * **AND** Stock reduced from Inventory.
+        * *(If any step fails, the entire transaction rolls back).*
