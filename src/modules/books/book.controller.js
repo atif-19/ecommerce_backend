@@ -54,7 +54,7 @@ const getBooks = async (req, res) => {
     // 1. Filtering
     // we extract the query parameters
     const queryObj = { ...req.query };
-    // exculude special fields from filtering so that we can handle them separately
+    // exclude special fields from filtering so that we can handle them separately
     const excludedFields = ['page', 'sort', 'limit', 'fields', 'keyword'];
     
     // Loop through and delete the special fields from our copy
