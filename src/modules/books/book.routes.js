@@ -1,7 +1,7 @@
 const express = require('express');
 const { protect, admin } = require('../../middlewares/authMiddleware');
 const { 
-  createBook, 
+  createBooks, 
   getBooks, 
   getBookById, 
   updateBook, 
@@ -15,7 +15,7 @@ router.get('/', getBooks);
 
 // Admin Route: Create a book
 // Notice we chain the middleware: First check if logged in (protect), THEN check if admin (admin)
-router.post('/', protect, admin, createBook);
+router.post('/', protect, admin, createBooks);
 
 
 // Route: /api/books/:id

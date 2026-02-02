@@ -11,70 +11,105 @@ const bookExists = async (title) => {
   return !!book;
 }
 
-const createBook = async (req, res) => {
+const createBooks = async (req, res) => {
   try {
-    const { title, author, description, price, category, stockQuantity } = req.body;
+    // Expecting an array of books in the request body
+    const { books } = req.body;
 
-    if(await bookExists(title)) {
-      return res.status(400).json({ message: 'Book already exists' });
+    // no books provided
+    if (!Array.isArray(books) || books.length === 0) {
+      return res.status(400).json({ message: "Books array is required" });
     }
 
-    const book = await Book.create({
-      title,
-      author,
-      description,
-      price,
-      category,
-      stockQuantity,
+    // getting titles of the each book
+    const titles = books.map((b) => b.title);
+
+    // Check for existing books with the same titles
+    const existingBooks = await Book.find({
+      title: { $in: titles }
+    });
+    // whatever book already exists, we will not add those
+    if (existingBooks.length > 0) {
+      return res.status(400).json({
+        message: "Some books already exist",
+        existingTitles: existingBooks.map(b => b.title)
+      });
+    }
+    // Create books in bulk
+    const createdBooks = await Book.insertMany(books);
+
+    // adding success response
+    res.status(201).json({
+      message: "Books added successfully",
+      count: createdBooks.length,
+      books: createdBooks
     });
 
-    res.status(201).json(book);
   } catch (error) {
+    // if something goes wrong return the error message
     res.status(500).json({ message: error.message });
   }
 };
-
 
 // @desc    Get books with Search, Category, and Price filters
 // @route   GET /api/books?keyword=Harry&category=Fiction&minPrice=10&maxPrice=50
 // @access  Public
 const getBooks = async (req, res) => {
   try {
-    const { keyword, category, minPrice, maxPrice } = req.query;
+    // 1. Filtering
+    // we extract the query parameters
+    const queryObj = { ...req.query };
+    // exculude special fields from filtering so that we can handle them separately
+    const excludedFields = ['page', 'sort', 'limit', 'fields', 'keyword'];
+    
+    // Loop through and delete the special fields from our copy
+    excludedFields.forEach(el => delete queryObj[el]);
 
-    // 1. Build the Query Object
-    let query = { isActive: true };
+    // convert queryObj to string to add $ to gte, lte etc for mongoose
+    let queryStr = JSON.stringify(queryObj);
+    queryStr = queryStr.replace(/\b(gte|gt|lte|lt)\b/g, match => `$${match}`);
+    
+    // we will build the query step by step\
+    // this is the basic query with filters
+    let query = Book.find(JSON.parse(queryStr));
 
-    // 2. Add Search Logic (if keyword exists)
-    if (keyword) {
-      query.title = {
-        $regex: keyword,
-        $options: 'i', // Case insensitive
-      };
+    // 2. Sorting
+
+    // if sort parameter is present in the query
+    if (req.query.sort) {
+      // we will sort by multiple fields if comma separated
+      const sortBy = req.query.sort.split(',').join(' ');
+      // apply the sort to the query (e.g. ?sort=price,-rating)
+      query = query.sort(sortBy);
+    } else {
+      // if no sort is provided, sort by createdAt descending
+      query = query.sort('-createdAt'); // Default
     }
 
-    // 3. Add Category Logic (if category exists)
-    if (category) {
-      query.category = category;
+    // 3. Pagination
+    const page = req.query.page * 1 || 1;
+    const limit = req.query.limit * 1 || 10;
+    const skip = (page - 1) * limit;
+    
+    query = query.skip(skip).limit(limit);
+
+    // 4. Searching
+    if (req.query.keyword) {
+      // apply regex search on title field
+      query = query.find({
+         title: { $regex: req.query.keyword, $options: 'i' }
+      });
     }
 
-    // 4. Add Price Range Logic (if min or max price exists)
-    if (minPrice || maxPrice) {
-      query.price = {};
-      if (minPrice) query.price.$gte = Number(minPrice); // Greater than or equal
-      if (maxPrice) query.price.$lte = Number(maxPrice); // Less than or equal
-    }
+    // EXECUTE
+    const books = await query;
 
-    // 5. Execute the Query
-    const books = await Book.find(query);
+    res.json({ count: books.length, data: books });
 
-    res.status(200).json(books);
   } catch (error) {
-    console.error(error);
     res.status(500).json({ message: error.message });
   }
 };
-
 // @desc    Get single book by ID
 // @route   GET /api/books/:id
 // @access  Public
@@ -141,7 +176,7 @@ const deleteBook = async (req, res) => {
 };
 
 module.exports = { 
-createBook, 
+createBooks, 
   getBooks, 
   getBookById, 
   updateBook, 

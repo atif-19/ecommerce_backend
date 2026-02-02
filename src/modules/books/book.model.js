@@ -7,6 +7,7 @@ const bookSchema = new mongoose.Schema(
       type: String,
       required: [true, 'Book title is required'],
       trim: true,
+      index: true,// using for faster search
     },
     author: {
       type: String,
@@ -21,10 +22,12 @@ const bookSchema = new mongoose.Schema(
       type: Number,
       required: [true, 'Price is required'],
       default: 0,
+      index: true,// using for price range queries
     },
     category: {
       type: String,
       required: [true, 'Category is required'],
+      index: true,// using for category based search
     },
     stockQuantity: {
       type: Number,
@@ -40,9 +43,8 @@ const bookSchema = new mongoose.Schema(
     timestamps: true,
   }
 );
-// Indexes help us search faster later (e.g. searching by title or category)
-bookSchema.index({ title: 1 });
-bookSchema.index({ category: 1 });
-
+// If users often search for "Category" AND "Price" together, we index them together.
+// 1 = Ascending, -1 = Descending
+bookSchema.index({ category: 1, price: 1 });
 const Book = mongoose.model('Book', bookSchema);
 module.exports = Book;
