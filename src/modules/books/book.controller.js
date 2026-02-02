@@ -5,11 +5,6 @@ const Book = require('./book.model');
 // @route   POST /api/admin/books
 // @access  Private/Admin
 
-// function to check wether the book already exists can be added later
-const bookExists = async (title) => {
-  const book = await Book.findOne({ title });
-  return !!book;
-}
 
 const createBooks = async (req, res) => {
   try {
