@@ -4,7 +4,7 @@ const dotenv = require('dotenv');
 const cors = require('cors');
 const connectDB = require('./utils/db');
 const bodyParser = require('body-parser');
-
+const morgan = require('morgan'); // for request logging
 
 // --- NEW SECURITY IMPORTS ---
 const mongoSanitize = require("express-mongo-sanitize");
@@ -54,6 +54,10 @@ app.use('/api', limiter); // Apply to all API routes
 // 4. Prevent Parameter Pollution
 app.use(hpp());
 
+//  Logger Middleware (Development mode)
+if (process.env.NODE_ENV === 'development') {
+  app.use(morgan('dev'));
+}
 
 
 // Routes
